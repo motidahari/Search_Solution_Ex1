@@ -13,9 +13,12 @@ public class Printer {
         this._Time = time;
     }
 
+    private static String fixPath(String path) {
+        return path.substring(1,path.length()-1);
+    }
 
     public static void Output(boolean foundSolution, boolean time, boolean print, String path, int numOfCreated, int price, double totalTime) {
-            writingToFile(foundSolution, time, print, path, numOfCreated, price, totalTime);
+            writingToFile(foundSolution, time, print, fixPath(path), numOfCreated, price, totalTime);
     }
 
     private static void writingToFile(boolean foundSolution, boolean time, boolean print, String path, int numOfCreated, int price, double totalTime) {

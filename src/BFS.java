@@ -58,16 +58,16 @@ public class BFS extends Algorithm{
 //        printOpenList();
 //        printClosedList();
         if(path.length() > 0 && _numOfExpanded > 0 && price > 0){
-            path = fixPath(path);
+//            path = fixPath(path);
             endTime = System.currentTimeMillis();
             long time = endTime - startTime;
             finish(true,_Time,path, _numOfExpanded,price,time);
         }
     }
 
-    private String fixPath(String path) {
-        return path.substring(1,path.length()-1);
-    }
+//    private String fixPath(String path) {
+//        return path.substring(1,path.length()-1);
+//    }
 
 
     private void printOpenList() {

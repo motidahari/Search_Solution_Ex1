@@ -1,7 +1,9 @@
+import javax.swing.plaf.nimbus.State;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Board {
@@ -79,6 +81,8 @@ public class Board {
         }
     }
 
+
+
     private void initStartState(int line, String data, int indexRow) {
         int indexEmpty = 0;
         String[] arr = data.split(",");
@@ -93,6 +97,7 @@ public class Board {
             }
         }
     }
+
 
     private void initSizeBoar(String data) {
         String[] arr = data.split("x");

@@ -18,12 +18,16 @@ public class Ex1 {
     public static void AlgorithmSelection() {
         switch (in.get_AlgoName()) {
             case "A*":
-                System.out.println("A*");
+//                System.out.println("A*");
                 Algorithm A_Star = new A_Star(in, startAndGoal);
+                A_Star.solve();
+
                 break;
             case "DFBnB":
-                System.out.println("DFBnB");
+//                System.out.println("DFBnB");
                 Algorithm DFBnB = new DFBnB(in, startAndGoal);
+                DFBnB.solve();
+
                 break;
             case "BFS":
 //                System.out.println("BFS");
@@ -32,12 +36,16 @@ public class Ex1 {
 
                 break;
             case "DFID":
-                System.out.println("DFID");
+//                System.out.println("DFID");
                 Algorithm DFID = new DFID(in, startAndGoal);
+                DFID.solve();
+
                 break;
             case "IDA*":
-                System.out.println("IDA*");
+//                System.out.println("IDA*");
                 Algorithm IDA_Star = new IDA_Star(in, startAndGoal);
+                IDA_Star.solve();
+
                 break;
         }
     }

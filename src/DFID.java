@@ -1,79 +1,83 @@
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 
-public class DFID extends Algorithm{
-
-    private StateGame _Start,_Goal;
-    private static HashSet<StateGame> _OpenList;
-    private int _Created;
+public class DFID extends Algorithm {
     private Board in;
-    private int _numOfCreated = 0;
+    private StateGame _Start, _Goal;
+    private HashSet<StateGame> _OpenList;
+    private int _numOfExpanded = 1;
     private boolean run = true;
-    private String _Path;
     private int price = 0;
-    private double _time = 0;
-    boolean print,time;
+    private String _Path;
+
 
     public DFID(Board in, StateGame[] startAndGoal) {
         this.in = in;
         this._Time = in.is_Time();
         this._Print = in.is_ToPrint();
-        this._OpenList = new HashSet<>();
+//        this._OpenList = new HashSet<>();
         this._Start = startAndGoal[0];
         this._Goal = startAndGoal[1];
-        this._numOfCreated = 0;
-        solve();
     }
 
     @Override
     public void solve() {
-        _Created = 1;
         for (int i = 1; i < Integer.MAX_VALUE; i++) {
-            if (!((_Path = DFS(_Start, _Goal, i))).equals("false")) {
+            this._OpenList = new HashSet<>();
+            String path = DFS(_Start, _Goal, i, _OpenList);
+            if (!path.equals("cutOff")) {
+                System.out.println("output = " + path);
+            if(path.length() > 0 && _numOfExpanded > 0 && price > 0){
+                endTime = System.currentTimeMillis();
+                long time = endTime - startTime;
+                int maxCost = _OpenList.stream().mapToInt(StateGame::get_Cost).max().orElseThrow(NoSuchElementException::new);
+                finish(true,_Time,_Path, _numOfExpanded,price,time);
+            }
                 return;
             }
         }
     }
-    private String DFS(StateGame start, StateGame goal, int limit) {
-//        PrintToScreen(output.is_Print(), possible);
-        if ((start.get_KeyState()).equals(goal.get_KeyState())) {
-            getPathToGoal(start);
-            return _Path;
+
+    private String DFS(StateGame curr, StateGame goal, int limit, HashSet<StateGame> openList) {
+        if ((curr.get_KeyState()).equals(goal.get_KeyState())) {
+            getPathToGoal(curr);
+            return "Found";
         } else if (limit == 0) {
-            return "false";
-        }else {
-            _OpenList.add(start);
+            return "cutOff";
+        } else {
+            openList.add(curr);
             boolean isCutoff = false;
-            Queue<StateGame> options = Operator.StateOperator(start);
-            _Created += options.size();
-            while (!options.isEmpty())  {
-                StateGame p = options.poll();
-                if (!_OpenList.contains(p)) {
-                    String result = DFS(p, goal, limit - 1);
-                    if (result.equals("cutOff")) {
-                        isCutoff = true;
-                    } else if (!result.equals("fail")) {
-                        return result;
-                    }
+            Queue<StateGame> options = Operator.StateOperator(curr);
+            for (StateGame p : options) {
+                if (openList.contains(p))
+                    continue;
+                _numOfExpanded++;
+                String result = DFS(p, goal, limit - 1, openList);
+                if (result.equals("cutOff"))
+                    isCutoff = true;
+                else if (!result.equals("fail")) {
+                    return result;
                 }
             }
-            _OpenList.remove(start);
+            openList.remove(curr);
             if (isCutoff) {
-                return "false";
-            }else {
+                return "cutOff";
+            } else {
                 return "fail";
             }
         }
-
     }
+
+
     private String fixPath(String path) {
-        return path.substring(1,path.length()-1);
+        return path.substring(1, path.length() - 1);
     }
 
     private void getPathToGoal(StateGame node) {
         int price = node.get_Cost();
         String strMoves = "";
-        for (StateGame i = node ; i != null ; i = i.get_Parent()) {
+        for (StateGame i = node; i != null; i = i.get_Parent()) {
             strMoves = i.get_Move() + "-" + strMoves;
         }
         this._Path = strMoves;
