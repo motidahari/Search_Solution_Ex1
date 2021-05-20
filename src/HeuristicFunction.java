@@ -225,7 +225,7 @@ public class HeuristicFunction implements Comparator<StateGame> {
 
     }
 
-    private int getFCost(StateGame state) {
+    public int getFCost(StateGame state) {
         Manhattan heu = new Manhattan(_Goal);
         return state.get_Cost() + heu.getH(state);
     }

@@ -10,12 +10,15 @@ public class StateGame {
     private Point[] _EmptyPlaces;
     private int _Paid, _DepthDevelopment, _CostForThisPlace;
     private double _DistanceHeuristic;
+    //for AStar
+    private boolean isOut = false;
 
     public StateGame(int[][] mat, StateGame parent, String m, Point[] emptyPlaces, int cost) {
-        _ROW = mat.length;
-        _COL = mat[0].length;
-        _EmptyPlaces = new Point[0];
+        this._ROW = mat.length;
+        this._COL = mat[0].length;
+        this._EmptyPlaces = new Point[0];
         this._Move = m;
+        this._Mark = "";
 //        this._Paid = (cost != 0 && parent != null) ? cost + parent._Paid : 0;
         this._CostForThisPlace = cost;
         setMatAndKey(mat);
@@ -39,7 +42,13 @@ public class StateGame {
     public void setDistance(StateGame goal) {
 //        this._Distance = HeuristicFunction.HeuristicValue(this,goal);
     }
+    public boolean isOut() {
+        return isOut;
+    }
 
+    public void setOut(boolean out) {
+        isOut = out;
+    }
     private void setEmptyPlaces() {
         int index = 0;
         for (int i = 0; i < _ROW; i++) {
@@ -162,9 +171,9 @@ public class StateGame {
             str += "\t\t[";
             for (int j = 0; j < mat[i].length; j++) {
                 if (j == 0) {
-                    str += mat[i][j];
+                    str += (mat[i][j] != -1)? mat[i][j] : "_";
                 } else {
-                    str += ", " + mat[i][j];
+                    str += (mat[i][j] != -1)? ", " + mat[i][j] : ", " + "_";
                 }
             }
             str += "]\n";

@@ -11,7 +11,7 @@ public class A_Star extends Algorithm{
     private HeuristicFunction heuristic;
     private boolean run = true;
     private String _Path;
-    private int price = 0;
+    private int _Price = 0;
     private PriorityQueue<StateGame> L;
 
     public A_Star(Board in, StateGame[] startAndGoal){
@@ -32,6 +32,9 @@ public class A_Star extends Algorithm{
         while (!L.isEmpty()) {
 //            System.out.println("while");
             StateGame current = L.poll();
+            if (in.is_ToPrint()) {
+                System.out.println(current.getStringMat(current.get_Mat()));
+            }
             H.remove(current);
             if (current.equals(_Goal)) {
                 getPathToGoal(current);
@@ -44,7 +47,6 @@ public class A_Star extends Algorithm{
 
             for(StateGame option:options){
                 if(!C.containsKey(option) && !L.contains(option)){
-
                     L.add(option);
                     H.put(option,option);
                 }else if (L.contains(option) && H.get(option) != null && H.get(option).get_Cost() > option.get_Cost()) {
@@ -56,11 +58,11 @@ public class A_Star extends Algorithm{
             }
         }
         System.out.println("finish");
-        if (!run && _Path.length() > 0 && _numOfCreated > 0 && price > 0) {
+        if (!run && _Path.length() > 0 && _numOfCreated > 0 && _Price > 0) {
             _Path = _Path.substring(1,_Path.length()-1);
             endTime = System.currentTimeMillis();
             long time = endTime - startTime;
-            finish(true,_Time,_Path,_numOfCreated,price,time);
+            finish(true,_Time,_Path,_numOfCreated,_Price,time);
         }
 
     }
@@ -72,6 +74,6 @@ public class A_Star extends Algorithm{
             strMoves = i.get_Move() + "-" + strMoves;
         }
         this._Path = strMoves;
-        this.price = price;
+        this._Price = price;
     }
 }

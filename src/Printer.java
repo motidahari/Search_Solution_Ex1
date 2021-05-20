@@ -14,7 +14,17 @@ public class Printer {
     }
 
     private static String fixPath(String path) {
-        return path.substring(1,path.length()-1);
+        String str = path;
+        if(str.charAt(0) == '-'){
+            str = path.substring(1,path.length());
+            return fixPath(str);
+        }
+        if(str.charAt(str.length()-1) == '-'){
+            str = path.substring(0,path.length()-1);
+            return fixPath(str);
+        }
+        return str;
+//        return path.substring(1,path.length()-1);
     }
 
     public static void Output(boolean foundSolution, boolean time, boolean print, String path, int numOfCreated, int price, double totalTime) {

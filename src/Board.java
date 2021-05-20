@@ -13,6 +13,9 @@ public class Board {
     private int [][] _Start,_Goal;
     private StateGame Start,Goal;
     private Point[] _EmptyPlace = new Point[0];
+    //for AStar
+    private boolean isOut = false;
+
 
     public Board(String path){
         initGame(path);
@@ -219,4 +222,6 @@ public class Board {
     public void setGoal(StateGame goal) {
         Goal = goal;
     }
+
+
 }

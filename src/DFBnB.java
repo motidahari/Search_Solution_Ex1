@@ -2,101 +2,115 @@ import java.util.*;
 
 public class DFBnB extends Algorithm{
     private Board in;
-    private HashMap<StateGame,StateGame> _OpenList;
+    private Stack<StateGame> L;
+    private Hashtable<StateGame, StateGame> H;
+    private int threshold = 0;
+    private Manhattan _heuristic;
+    private HeuristicFunction heuristic;
+//    private Heuristic<StateGame> heuristic;
     private StateGame _Start,_Goal;
     private int _numOfCreated = 1;
-    private boolean run = true;
+    private boolean run = true,foundSolution = false;
     private String _Path;
-    private int price = 0;
+    private int _Price = 0;
     private static ArrayList<StateGame> _List;
 
-
-    public DFBnB(Board in, StateGame[] startAndGoal) {
+    public DFBnB(Board in, StateGame[] startAndGoal, Manhattan manhattan) {
+        this._heuristic = manhattan;
         this.in = in;
-        this._Time = in.is_Time();
-        this._Print = in.is_ToPrint();
-        this._OpenList = new HashMap<>();
-        _List = new ArrayList<>();
         this._Start = startAndGoal[0];
         this._Goal = startAndGoal[1];
-        this._numOfCreated = 0;
-        solve();
+        this._Time = in.is_Time();
+        this._Print = in.is_ToPrint();
+        this.heuristic = new HeuristicFunction(_Start,_Goal);
     }
 
     @Override
     public void solve() {
-        _List = new ArrayList<>();
-        Stack<StateGame> stack = new Stack<>();
-        _OpenList.put(_Start, _Start);
-        stack.add(_Start);
-        _Start.setDistance(_Goal);
-        double t =  _Start.get_DistanceHeuristic() * 7.5;
+//        double startTime, endTime, totalTime; //for time keeping
+//        startTime = System.currentTimeMillis();
 
-        while (!stack.empty()) {
-            if (!run) break;
-            StateGame n = stack.pop();
-            if (n.get_Mark().equals("out")) {
-                _OpenList.remove(n);
-
+        StateGame resultState = null;
+        StateGame start = _Start;
+        StateGame goal = _Goal;
+        int threshold = Integer.MAX_VALUE;
+        int totalBlocks = _Start.get_ROW() * _Start.get_COL();
+//        int numOfBlack = p.getNumOfBlack();
+        int totalToLIMIT = totalBlocks;
+//        if (totalToLIMIT <= 12) {
+//            threshold = factorial(totalToLIMIT);
+//        }
+        ArrayList<StateGame> result = new ArrayList<>();
+        L = new Stack<>();
+        H = new Hashtable<>();
+        L.add(start);
+        H.put(start, start);
+        while (!L.isEmpty()) {
+            StateGame n = L.pop();
+            if (in.is_ToPrint()) {
+                System.out.println(n.getStringMat(n.get_Mat()));
+            }
+            if (n.isOut()) {
+                H.remove(n);
             } else {
-                n.set_Mark("out");
-                Queue<StateGame> queue = Operator.StateOperator(n);
-                ArrayList<StateGame> options = new ArrayList<>();
-                options.addAll(queue);
-                for (StateGame set:options) {
-                    set.setDistance(_Goal);
-                }
-//                options.sort(new StateGameComparator()::compare);
-                ArrayList<StateGame> copy = new ArrayList<>(options);
-                _numOfCreated += options.size();
+                n.setOut(true);
+                L.add(n);
+                List l = (List) Operator.StateOperator(n);
 
-                for (StateGame possible : copy) {
-                    possible.setDistance(_Goal);
-                    int fg = (int) possible.get_DistanceHeuristic() + possible.get_Cost();
-                    if (fg >= t) {
-                        for (StateGame toRm: copy ) {
-                            int tempV =(int)toRm.get_DistanceHeuristic() +toRm.get_Cost();
-                            if (tempV >= t){
-                                options.remove(toRm);
+                Queue<StateGame> list = Operator.StateOperator(n);
+                ArrayList<StateGame> allChilds = new ArrayList<>();
+                for(StateGame s: list){
+                    allChilds.add(s);
+                }
+                allChilds.sort(heuristic::compare);
+                ArrayList<StateGame> copyAllChilds = new ArrayList<>(allChilds);
+                _numOfCreated ++;
+                for (StateGame child : copyAllChilds) {
+                    if (heuristic.getFCost(child) >= threshold) {
+                        //delete everyone after him. include him
+                        for (StateGame children : copyAllChilds) {
+                            if (heuristic.getFCost(children) >= threshold) {
+                                allChilds.remove(children);
                             }
                         }
-                    } else if (_OpenList.containsKey(possible) && possible.get_Mark().equals("out")) {
-                        options.remove(possible);
-                    } else if (_OpenList.containsKey(possible) && !possible.get_Mark().equals("out")) {
-                        double left = _OpenList.get(possible).get_Cost();
-                        double right = possible.get_Cost();
-
-                        if (left <= right) {
-                            options.remove(possible);
+                    } else if (H.contains(child) && H.get(child).isOut()) {
+                        allChilds.remove(child);
+                    } else if (H.contains(child) && !H.get(child).isOut()) {
+                        if (heuristic.getFCost(H.get(child)) <= heuristic.getFCost(child)) {
+                            allChilds.remove(child);
                         } else {
-                            _OpenList.remove(possible);
-                            stack.remove(possible);
+                            L.remove(H.get(child));
+                            H.remove(child);
                         }
-                    } else if ((possible.get_KeyState()).equals(_Goal.get_KeyState())) {
-                        getPathToGoal(possible);
-                        t = possible.get_Cost();
-                        for (StateGame path : stack) {
-                            if (path.get_Mark().equals("out"))
-                                _List.add(path);
+                    } else if (child.equals(goal)) {
+                        foundSolution = true;
+                        getPathToGoal(child);
+                        threshold = heuristic.getFCost(child);
+                        result.clear();
+                        resultState = child;
+                        for (StateGame state : L) {
+                            if (state.isOut()) {
+                                result.add(state);
+                            }
                         }
-                        options.removeIf(StateGame -> options.indexOf(possible) < options.indexOf(possible));
-                        options.remove(possible);
-                        run = false;
-
+                        allChilds.removeIf(boardState -> allChilds.indexOf(child) < allChilds.indexOf(boardState));
+                        allChilds.remove(child);
                     }
-                    Collections.reverse(options);
-                    stack.addAll(options);
-                    for (StateGame toPut: options) {
-                        _OpenList.put(toPut, toPut);
+                    Collections.reverse(allChilds);
+                    L.addAll(allChilds);
+                    for (StateGame boardState : allChilds) {
+                        H.put(boardState, boardState);
                     }
                 }
             }
         }
-        if (run && _Path.length() > 0 && _numOfCreated > 0 && price > 0) {
+
+
+        if (foundSolution && _Path.length() > 0 && _numOfCreated > 0 && _Price > 0) {
             _Path = _Path.substring(1,_Path.length()-1);
             endTime = System.currentTimeMillis();
             long time = endTime - startTime;
-            finish(true,_Time,_Path,_numOfCreated,price,time);
+            finish(true,_Time,_Path,_numOfCreated,_Price,time);
         }
     }
     private void getPathToGoal(StateGame node) {
@@ -106,6 +120,6 @@ public class DFBnB extends Algorithm{
             strMoves = i.get_Move() + "-" + strMoves;
         }
         this._Path = strMoves;
-        this.price = price;
+        this._Price = price;
     }
 }

@@ -25,7 +25,7 @@ public class Ex1 {
                 break;
             case "DFBnB":
 //                System.out.println("DFBnB");
-                Algorithm DFBnB = new DFBnB(in, startAndGoal);
+                Algorithm DFBnB = new DFBnB(in, startAndGoal,new Manhattan(in.getGoal()));
                 DFBnB.solve();
 
                 break;
@@ -43,7 +43,7 @@ public class Ex1 {
                 break;
             case "IDA*":
 //                System.out.println("IDA*");
-                Algorithm IDA_Star = new IDA_Star(in, startAndGoal);
+                Algorithm IDA_Star = new IDA_Star(in, startAndGoal,new Manhattan(in.getGoal()));
                 IDA_Star.solve();
 
                 break;

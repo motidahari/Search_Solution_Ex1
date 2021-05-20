@@ -1,4 +1,4 @@
-A*
+IDA*
 with time
 with open
 3x4

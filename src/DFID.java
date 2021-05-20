@@ -8,7 +8,7 @@ public class DFID extends Algorithm {
     private HashSet<StateGame> _OpenList;
     private int _numOfExpanded = 1;
     private boolean run = true;
-    private int price = 0;
+    private int _Price = 0;
     private String _Path;
 
 
@@ -28,13 +28,13 @@ public class DFID extends Algorithm {
             String path = DFS(_Start, _Goal, i, _OpenList);
             if (!path.equals("cutOff")) {
                 System.out.println("output = " + path);
-            if(path.length() > 0 && _numOfExpanded > 0 && price > 0){
+            if(path.length() > 0 && _numOfExpanded > 0 && _Price > 0){
                 endTime = System.currentTimeMillis();
                 long time = endTime - startTime;
                 int maxCost = _OpenList.stream().mapToInt(StateGame::get_Cost).max().orElseThrow(NoSuchElementException::new);
-                finish(true,_Time,_Path, _numOfExpanded,price,time);
+                finish(true,_Time,_Path, _numOfExpanded,_Price,time);
             }
-                return;
+            return;
             }
         }
     }
@@ -54,11 +54,15 @@ public class DFID extends Algorithm {
                     continue;
                 _numOfExpanded++;
                 String result = DFS(p, goal, limit - 1, openList);
-                if (result.equals("cutOff"))
+                if (result.equals("cutOff")) {
                     isCutoff = true;
+                }
                 else if (!result.equals("fail")) {
                     return result;
                 }
+            }
+            if (in.is_ToPrint()) {
+                System.out.println(curr.getStringMat(curr.get_Mat()));
             }
             openList.remove(curr);
             if (isCutoff) {
@@ -69,18 +73,13 @@ public class DFID extends Algorithm {
         }
     }
 
-
-    private String fixPath(String path) {
-        return path.substring(1, path.length() - 1);
-    }
-
     private void getPathToGoal(StateGame node) {
         int price = node.get_Cost();
         String strMoves = "";
-        for (StateGame i = node; i != null; i = i.get_Parent()) {
+        for (StateGame i = node ; i != null ; i = i.get_Parent()) {
             strMoves = i.get_Move() + "-" + strMoves;
         }
         this._Path = strMoves;
-        this.price = price;
+        this._Price = price;
     }
 }
