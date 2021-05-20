@@ -1,62 +1,62 @@
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class A_Star extends Algorithm{
     private Board in;
-    private HashMap<StateGame,StateGame> _OpenList;
-    private HashMap<StateGame,StateGame> _ClosedList;
+    private HashMap<StateGame,StateGame> C;
+    private HashMap<StateGame,StateGame> H;
     private StateGame _Start,_Goal;
     private int _numOfCreated = 0;
+    private HeuristicFunction heuristic;
     private boolean run = true;
     private String _Path;
     private int price = 0;
-
+    private PriorityQueue<StateGame> L;
 
     public A_Star(Board in, StateGame[] startAndGoal){
         this.in = in;
         this._Time = in.is_Time();
         this._Print = in.is_ToPrint();
-        this._OpenList = new HashMap<>();
-        this._ClosedList = new HashMap<>();
+        this.C = new HashMap<>();
+        this.H = new HashMap<>();
         this._Start = startAndGoal[0];
         this._Goal = startAndGoal[1];
-        this._numOfCreated = 0;
-        solve();
+        this.heuristic = new HeuristicFunction(_Start,_Goal);
+        this.L =  new PriorityQueue<StateGame>(heuristic::compare);
     }
     @Override
     public void solve() {
-//        PriorityQueue<StateGame> queue = new PriorityQueue<StateGame>(new StateComparator());
-        PriorityQueue<StateGame> queue = new PriorityQueue<StateGame>();
-        queue.add(_Start);
-        _OpenList.put(_Start,_Start);
-        _numOfCreated = 0;
-        while (!queue.isEmpty()) {
-            StateGame current = queue.poll();
-            if ((_Start.get_KeyState()).equals(_Goal.get_KeyState())) {
+
+        L.add(_Start);
+        while (!L.isEmpty()) {
+//            System.out.println("while");
+            StateGame current = L.poll();
+            H.remove(current);
+            if (current.equals(_Goal)) {
                 getPathToGoal(current);
                 run = false;
                 break;
             }
-            _ClosedList.put(current,current);
+            C.put(current,current);
             Queue<StateGame> options = Operator.StateOperator(current);
-            _numOfCreated += options.size();
-            while (!options.isEmpty()) {
-                StateGame possible = options.poll();
-                if (!(_ClosedList.containsKey(possible)) &&
-                        !(_OpenList.containsKey(possible))) {
-                    possible.setDistance(_Goal);
-                    queue.add(possible);
-                    _OpenList.put(possible,possible);
-                }else if (queue.contains(possible) && _OpenList.containsKey(possible) && _OpenList.get(possible).get_Cost() > possible.get_Cost()) {
-                    queue.remove(possible);
-                    queue.add(possible);
-                    _OpenList.put(possible, possible);
+            _numOfCreated++;
+
+            for(StateGame option:options){
+                if(!C.containsKey(option) && !L.contains(option)){
+
+                    L.add(option);
+                    H.put(option,option);
+                }else if (L.contains(option) && H.get(option) != null && H.get(option).get_Cost() > option.get_Cost()) {
+                    L.remove(option);
+                    L.add(option);
+                    H.put(option, option);
                 }
+
             }
         }
-        if (run && _Path.length() > 0 && _numOfCreated > 0 && price > 0) {
+        System.out.println("finish");
+        if (!run && _Path.length() > 0 && _numOfCreated > 0 && price > 0) {
             _Path = _Path.substring(1,_Path.length()-1);
             endTime = System.currentTimeMillis();
             long time = endTime - startTime;
@@ -72,7 +72,6 @@ public class A_Star extends Algorithm{
             strMoves = i.get_Move() + "-" + strMoves;
         }
         this._Path = strMoves;
-        this._numOfCreated = _numOfCreated;
         this.price = price;
     }
 }
